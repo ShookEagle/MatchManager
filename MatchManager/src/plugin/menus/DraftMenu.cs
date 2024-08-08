@@ -8,9 +8,9 @@ namespace MatchManager.plugin.menus;
 
 public sealed class DraftMenu : CenterHtmlMenu
 {
-    public DraftMenu(BasePlugin baseplugin, IMatchManager plugin) : base("Draft Menu", baseplugin)
+    public DraftMenu(BasePlugin baseplugin, IMatchManager plugin) : base("Pick a Player to Draft", baseplugin)
    {
-       List<CCSPlayerController> freeAgents = Utilities.GetPlayers()
+       var freeAgents = Utilities.GetPlayers()
            .Where(p => !p.IsBot 
                   && p.IsReal() 
                   && !plugin.getTeamsService().GetTeams().SelectMany(team => team.TeamMembers).Contains(p)).ToList();
