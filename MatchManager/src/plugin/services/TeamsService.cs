@@ -3,6 +3,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using MatchManager.api.plugin;
 using MatchManager.api.plugin.services;
+using MatchManager.plugin.enums;
 using MatchManager.plugin.extensions;
 using MatchManager.plugin.menus;
 using MatchManager.plugin.models;
@@ -16,6 +17,7 @@ public class TeamsService(IMatchManager plugin) : ITeamsService
     private readonly Dictionary<CCSPlayerController, int> _draftNumbers = new();
     private bool _isCaptainDraft;
     private bool _isDraft;
+    private MatchState _matchState;
 
     public void InitializeNewTeams()
     {
@@ -60,12 +62,15 @@ public class TeamsService(IMatchManager plugin) : ITeamsService
         if (otherTeam.TeamMembers.Count == 5 && thisTeam.TeamMembers.Count == 5)
         {
             _isDraft = false;
-            //Initialize Match Here
+            plugin.getAnnouncer().Announce("draft_finished");
+            plugin.getAnnouncer().Announce("draft_team_1", thisTeam.TeamMembers[0].PlayerName, thisTeam.TeamMembers[1].PlayerName, thisTeam.TeamMembers[2].PlayerName, thisTeam.TeamMembers[3].PlayerName, thisTeam.TeamMembers[4].PlayerName, thisTeam.CurrentSide == CsTeam.Terrorist ? "Terrorists" : "Counter-Terrorists");
+            plugin.getAnnouncer().Announce("draft_team_2", otherTeam.TeamMembers[0].PlayerName, otherTeam.TeamMembers[1].PlayerName, otherTeam.TeamMembers[2].PlayerName, otherTeam.TeamMembers[3].PlayerName, otherTeam.TeamMembers[4].PlayerName, otherTeam.CurrentSide == CsTeam.Terrorist ? "Terrorists" : "Counter-Terrorists");
         }
     }
 
     public void BeginDraft()
     {
+        plugin.getMatchService().SetState(MatchState.Draft);
         _isDraft = true;
         var starting = _teams.FirstOrDefault(t => t.Id == _rng.Next(1, 3))!.TeamCaptain!;
         plugin.getAnnouncer().Announce("draft_chose_starter", starting.PlayerName);

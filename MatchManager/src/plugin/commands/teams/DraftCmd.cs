@@ -1,3 +1,4 @@
+using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Commands;
 using MatchManager.api.plugin;
@@ -15,6 +16,12 @@ public class DraftCmd(IMatchManager plugin) : Command(plugin)
         if (plugin.getTeamsService().IsCaptainDraft())
         {
             info.ReplyLocalized(plugin.getBase().Localizer, "command_draft_already_started");
+            return;
+        }
+
+        if (Utilities.GetPlayers().Where(p => p.IsReal()).ToList().Count <= 10)
+        {
+            info.ReplyLocalized(plugin.getBase().Localizer, "command_draft_not_enough_player");
             return;
         }
         

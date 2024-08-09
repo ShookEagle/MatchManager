@@ -2,7 +2,9 @@ using CounterStrikeSharp.API.Core;
 using MatchManager.api.plugin;
 using MatchManager.api.plugin.services;
 using MatchManager.plugin.commands;
+using MatchManager.plugin.commands.match;
 using MatchManager.plugin.commands.teams;
+using MatchManager.plugin.listeners;
 using MatchManager.plugin.services;
 
 namespace MatchManager.plugin;
@@ -36,6 +38,8 @@ public class MatchManager : BasePlugin, IPluginConfig<MatchManagerConfig>, IMatc
 
     public override void Load(bool hotReload)
     {
+        _ = new JoinTeamListener(this);
+        
         _matchService = new MatchService(this);
         _teamsService = new TeamsService(this);
         _announcer = new Announcer(this);
@@ -48,6 +52,8 @@ public class MatchManager : BasePlugin, IPluginConfig<MatchManagerConfig>, IMatc
         commands.Add("css_draft", new DraftCmd(this));
         commands.Add("css_guess", new GuessCmd(this));
         commands.Add("css_captain", new CaptainCmd(this));
+        commands.Add("css_ready", new ReadyCmd(this));
+        commands.Add("css_forceready", new ForceReadyCmd(this));
 
     foreach (var command in commands)
             AddCommand(command.Key, command.Value.Description ?? "No Description Provided", command.Value.OnCommand);
