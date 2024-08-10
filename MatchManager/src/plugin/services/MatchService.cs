@@ -1,9 +1,11 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Timers;
 using MatchManager.api.plugin;
 using MatchManager.api.plugin.services;
 using MatchManager.plugin.enums;
 using MatchManager.plugin.extensions;
+using MatchManager.plugin.utils;
 
 namespace MatchManager.plugin.services;
 
@@ -36,14 +38,14 @@ public class MatchService(IMatchManager plugin) : IMatchService
 
     public void InitiatePreMatch()
     {
-        ServerExtensions.GetGameRules(out var gamerules, out var proxy);
-        if (gamerules == null || proxy == null) return;
+        CfgUtils.ExecWarmupSettings();
     }
 
     public void InitiateWarmup()
     {
         _state = MatchState.Warmup;
         var teams = plugin.getTeamsService().GetTeams();
+        CfgUtils.ExecWarmupSettings();
 
         foreach (var team in teams)
         {
@@ -55,7 +57,7 @@ public class MatchService(IMatchManager plugin) : IMatchService
 
         plugin.getBase().AddTimer(13f, () =>
         {
-            plugin.getAnnouncer().Announce("warmup_ready_up", _readyPlayers.Count.ToString());
+            plugin.getAnnouncer().Announce("warmup_ready_up", _readyPlayers.Count.ToString(), TimerFlags.REPEAT);
         });
         
         ServerExtensions.GetGameRules(out var gamerules, out var proxy);
@@ -68,6 +70,14 @@ public class MatchService(IMatchManager plugin) : IMatchService
     public void InitiateMatch()
     {
         _readyPlayers.Clear();
+        plugin.getBase().Timers.Clear();
+        
+        ServerExtensions.GetGameRules(out var gamerules, out var proxy);
+        if (gamerules == null || proxy == null) return;
+        
+        gamerules.WarmupPeriod = false;
+        Utilities.SetStateChanged(proxy, "CCSGameRulesProxy", "m_pGameRules");
+        Server.ExecuteCommand("mp_restartgame 1");
         
         
     }
