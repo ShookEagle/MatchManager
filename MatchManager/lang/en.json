@@ -29,5 +29,9 @@
   "warmup_already_ready": "%prefix%{red}You have already readied.",
   "warmup_all_ready": "%prefix%All players have readied.",
   "warmup_not_started": "%prefix%{red}This can only be run during warmups.",
+  "knife_begin": "%prefix%A knife round has begun.",
+  "knife_choosing_side": "%prefix%{gold}{0}{white} is choosing to switch or stay.",
+  "knife_switch": "%prefix%{gold}{0}{white} has chosen to switch sides.",
+  "knife_stay": "%prefix%{gold}{0}{white} has chosen to stay on the same side.",
   "error_player_null": "{darkred}ERROR:{red} a null reference has occured when attempting to get target."
 }

@@ -7,6 +7,7 @@ public interface ITeamsService
 {
     void InitializeNewTeams();
     HashSet<Team> GetTeams();
+    void SwitchSides();
     bool SetTeamCaptain(CCSPlayerController player);
     void AddPlayerToCaptainTeam(CCSPlayerController captain, CCSPlayerController player);
     void BeginDraft();

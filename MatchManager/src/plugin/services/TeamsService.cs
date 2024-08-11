@@ -37,6 +37,11 @@ public class TeamsService(IMatchManager plugin) : ITeamsService
         return _teams;
     }
 
+    public void SwitchSides()
+    {
+        (_teams.First().CurrentSide, _teams.Last().CurrentSide) = (_teams.Last().CurrentSide, _teams.First().CurrentSide);
+    }
+
     public bool SetTeamCaptain(CCSPlayerController player)
     {
         var team = _teams.FirstOrDefault(t => t.TeamCaptain == null);

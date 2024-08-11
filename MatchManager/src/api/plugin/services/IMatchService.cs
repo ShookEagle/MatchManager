@@ -11,4 +11,5 @@ public interface IMatchService
     void InitiatePreMatch();
     void InitiateWarmup();
     void InitiateMatch();
+    void BeginMain();
 }

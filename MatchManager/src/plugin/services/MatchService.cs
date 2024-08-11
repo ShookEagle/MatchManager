@@ -1,10 +1,13 @@
 using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Menu;
 using CounterStrikeSharp.API.Modules.Timers;
+using CounterStrikeSharp.API.Modules.Utils;
 using MatchManager.api.plugin;
 using MatchManager.api.plugin.services;
 using MatchManager.plugin.enums;
 using MatchManager.plugin.extensions;
+using MatchManager.plugin.menus;
 using MatchManager.plugin.utils;
 
 namespace MatchManager.plugin.services;
@@ -69,6 +72,7 @@ public class MatchService(IMatchManager plugin) : IMatchService
 
     public void InitiateMatch()
     {
+        _state = MatchState.MainMatch;
         _readyPlayers.Clear();
         plugin.getBase().Timers.Clear();
         
@@ -77,8 +81,42 @@ public class MatchService(IMatchManager plugin) : IMatchService
         
         gamerules.WarmupPeriod = false;
         Utilities.SetStateChanged(proxy, "CCSGameRulesProxy", "m_pGameRules");
+        CfgUtils.ExecMatchSettings();
+        KnifeRound();
+    }
+
+    public void BeginMain()
+    {
+        plugin.getBase().Timers.Clear();
+        CfgUtils.ExecMatchSettings();
+        plugin.getBase().DeregisterEventHandler<EventRoundEnd>(RoundListener);
         Server.ExecuteCommand("mp_restartgame 1");
+        plugin.getBase().RegisterEventHandler<EventStartHalftime>(HalfTime);
+    }
+
+    private void KnifeRound()
+    {
+        CfgUtils.ExecKnifeSettings();
+        Server.ExecuteCommand("mp_restartgame 1");
+        plugin.getAnnouncer().Announce("knife_begin");
+        plugin.getBase().RegisterEventHandler<EventRoundEnd>(RoundListener, HookMode.Pre);
+    }
+
+    private HookResult RoundListener(EventRoundEnd @event, GameEventInfo info)
+    {
+        var winningCaptain = plugin.getTeamsService().GetTeams().First(t => t.CurrentSide == (CsTeam)@event.Winner).TeamCaptain;
+        if (winningCaptain == null) return HookResult.Stop;
         
+        plugin.getAnnouncer().Announce("knife_choosing_side", winningCaptain.PlayerName);
         
+        winningCaptain.OpenMenu(new SwitchStayMenu(plugin.getBase(), plugin));
+        
+        return HookResult.Stop;
+    }
+
+    private HookResult HalfTime(EventStartHalftime @event, GameEventInfo info)
+    {
+        plugin.getTeamsService().SwitchSides();
+        return HookResult.Continue;
     }
 }
